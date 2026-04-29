@@ -176,4 +176,14 @@ Cleaner (less visual noise)
 
 8. Finally zipped all files
 9. Uploaded all files into github 
-    github repo url : 
+    github repo url : https://github.com/Babu-PHP/BikeRidesApp
+
+10. To Run project
+    step 1 : git clone https://github.com/Babu-PHP/BikeRidesApp
+    step 2 : run the command "npm start"
+    here our project will run.
+
+Conclusion : 
+1. I modify the Repositories code for optimization
+2. Modify the index.html and moutain-bikes.html files to clean and modern UI/UX
+3. Modified beach-cruisers.html code to load larger data with pagination
