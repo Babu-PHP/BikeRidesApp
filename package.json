@@ -1,0 +1,17 @@
+{
+  "name": "pedalpal-bike-rentals",
+  "version": "1.0.0",
+  "description": "A PHP bike rental app that uses Node.js to start PHP. Node's contribution here is typing 'php -S localhost:8080' so you don't have to.",
+  "main": "watch.js",
+  "scripts": {
+    "start": "php -S localhost:8080",
+    "watch": "node watch.js"
+  },
+  "engines": {
+    "node": "14.x"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "keywords": ["bikes", "php", "why-is-node-here"],
+  "license": "ISC"
+}

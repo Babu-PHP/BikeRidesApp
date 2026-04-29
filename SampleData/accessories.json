@@ -1,0 +1,48 @@
+[
+    {
+        "AccessoryID": 1,
+        "Name": "Trail Blazer Water Bottle",
+        "Category": "Hydration",
+        "Description": "Keeps your water cold and your excuses for stopping minimal.",
+        "UnitPrice": 2.99,
+        "StockCount": 14,
+        "CompatibleWith": [
+            "mountain",
+            "beach"
+        ]
+    },
+    {
+        "AccessoryID": 2,
+        "Name": "Wicker Beach Basket",
+        "Category": "Storage",
+        "Description": "Holds your picnic, your sunscreen, and one very small dog.",
+        "UnitPrice": 4.99,
+        "StockCount": 7,
+        "CompatibleWith": [
+            "beach"
+        ]
+    },
+    {
+        "AccessoryID": 3,
+        "Name": "NightRider Bike Light",
+        "Category": "Safety",
+        "Description": "Because riding in the dark and just hoping for the best is not a strategy.",
+        "UnitPrice": 3.49,
+        "StockCount": 18,
+        "CompatibleWith": [
+            "mountain",
+            "beach"
+        ]
+    },
+    {
+        "AccessoryID": 4,
+        "Name": "Summit Cargo Basket",
+        "Category": "Storage",
+        "Description": "Straps to your frame. Carries snacks. Does not carry your feelings.",
+        "UnitPrice": 5.99,
+        "StockCount": 3,
+        "CompatibleWith": [
+            "mountain"
+        ]
+    }
+]

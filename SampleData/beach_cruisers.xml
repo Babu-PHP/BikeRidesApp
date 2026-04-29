@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BeachCruisers>
+  <Bike>
+    <bike_id>1</bike_id>
+    <model_name>Sunset Drifter</model_name>
+    <color>Coral</color>
+    <frame_size>Medium</frame_size>
+    <daily_rate>14.99</daily_rate>
+    <is_available>false</is_available>
+  </Bike>
+  <Bike>
+    <bike_id>2</bike_id>
+    <model_name>Ocean Breeze</model_name>
+    <color>Teal</color>
+    <frame_size>Large</frame_size>
+    <daily_rate>16.99</daily_rate>
+    <is_available>true</is_available>
+  </Bike>
+  <Bike>
+    <bike_id>3</bike_id>
+    <model_name>Sandy Shores</model_name>
+    <color>Cream</color>
+    <frame_size>Small</frame_size>
+    <daily_rate>12.99</daily_rate>
+    <is_available>false</is_available>
+  </Bike>
+  <Bike>
+    <bike_id>4</bike_id>
+    <model_name>Tropical Wave</model_name>
+    <color>Lime Green</color>
+    <frame_size>Medium</frame_size>
+    <daily_rate>15.99</daily_rate>
+    <is_available>false</is_available>
+  </Bike>
+  <Bike>
+    <bike_id>5</bike_id>
+    <model_name>Breezy Blue</model_name>
+    <color>Sky Blue</color>
+    <frame_size>Large</frame_size>
+    <daily_rate>17.99</daily_rate>
+    <is_available>false</is_available>
+  </Bike>
+  <Bike>
+    <bike_id>6</bike_id>
+    <model_name>Flamingo Glide</model_name>
+    <color>Hot Pink</color>
+    <frame_size>Small</frame_size>
+    <daily_rate>13.99</daily_rate>
+    <is_available>false</is_available>
+  </Bike>
+</BeachCruisers>

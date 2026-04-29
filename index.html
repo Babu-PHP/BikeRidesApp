@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PedalPal Bike Rentals</title>
+
+<style>
+:root {
+    --primary: #6366f1;
+    --secondary: #8b5cf6;
+    --glass: rgba(255,255,255,0.1);
+    --text: #1f2937;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    color: white;
+}
+
+/* HEADER */
+.header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.header h1 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+}
+
+.bike-emoji {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.bike-emoji:hover {
+    transform: rotate(-10deg) scale(1.2);
+}
+
+/* CARDS */
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    max-width: 900px;
+    width: 100%;
+}
+
+.card {
+    backdrop-filter: blur(15px);
+    background: var(--glass);
+    border-radius: 20px;
+    padding: 30px;
+    transition: 0.3s;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+.card h2 {
+    margin: 15px 0;
+}
+
+.card p {
+    opacity: 0.85;
+    margin-bottom: 20px;
+}
+
+.card button {
+    width: 100%;
+    padding: 12px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    background: white;
+    color: var(--primary);
+    transition: 0.2s;
+}
+
+.card button:hover {
+    transform: scale(1.05);
+}
+
+/* TOAST */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(0,0,0,0.8);
+    padding: 12px 20px;
+    border-radius: 8px;
+    opacity: 0;
+    transition: 0.3s;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* FOOTER */
+.footer {
+    margin-top: 40px;
+    font-size: 0.8rem;
+    opacity: 0.7;
+    text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<header class="header">
+    <h1>
+        <span class="bike-emoji" id="resetBtn" title="Reset all data">🚲</span>
+        PedalPal
+    </h1>
+    <p>Choose your ride. No excuses 🚴</p>
+</header>
+
+<main class="cards">
+    <div class="card">
+        <div style="font-size:2.5rem">🏖️</div>
+        <h2>Beach Cruisers</h2>
+        <p>Relaxed rides for sunny days and slow moments.</p>
+        <button data-link="beach-cruisers.html">Browse</button>
+    </div>
+
+    <div class="card">
+        <div style="font-size:2.5rem">⛰️</div>
+        <h2>Mountain Bikes</h2>
+        <p>Built for adventure, trails, and chaos.</p>
+        <button data-link="mountain-bikes.html">Browse</button>
+    </div>
+</main>
+
+<footer class="footer">
+    PedalPal © 2026
+</footer>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const toast = document.getElementById('toast');
+
+function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+
+    clearTimeout(window.toastTimer);
+    window.toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3000);
+}
+
+// Navigation
+document.querySelectorAll('button[data-link]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        window.location.href = btn.dataset.link;
+    });
+});
+
+// Reset handler
+document.getElementById('resetBtn').addEventListener('click', async () => {
+    showToast('Resetting data...');
+
+    try {
+        await fetch('/handlers/bike-handler.php?action=reset', {
+            method: 'POST'
+        });
+
+        showToast('✅ Data reset successful');
+    } catch (e) {
+        showToast('❌ Reset failed');
+    }
+});
+</script>
+
+</body>
+</html>

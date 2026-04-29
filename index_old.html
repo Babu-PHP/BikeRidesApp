@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PedalPal Bike Rentals</title>
+    <!-- jQuery 1.12.4: EOL since 2016. Still works. Still here. Like a flip phone in a drawer. -->
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"
+            integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
+            crossorigin="anonymous"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .bike-emoji {
+            font-size: 2rem;
+            cursor: pointer;
+            display: inline-block;
+            transition: transform 0.2s;
+            user-select: none;
+        }
+
+        .bike-emoji:hover {
+            transform: scale(1.2);
+        }
+
+        .bike-emoji:active {
+            transform: scale(0.9);
+        }
+
+        .cards-container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            width: 380px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+        }
+
+        .card-emoji {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .card p {
+            color: #666;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .card-btn {
+            display: inline-block;
+            padding: 12px 32px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .card-btn:active {
+            transform: scale(0.97);
+        }
+
+        .beach-btn {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+        }
+
+        .beach-btn:hover {
+            background: linear-gradient(135deg, #e070e8, #e03050);
+        }
+
+        .mountain-btn {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+        }
+
+        .mountain-btn:hover {
+            background: linear-gradient(135deg, #2d8fe0, #00c8d8);
+        }
+
+        .footer {
+            margin-top: 50px;
+            color: rgba(255,255,255,0.7);
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .reset-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.85);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            display: none;
+            z-index: 9999;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>
+        <span class="bike-emoji" id="easterEggBike" title="Click to reset all data to defaults">🚲</span>
+        PedalPal Bike Rentals
+    </h1>
+    <p>Choose your adventure. Pedals provided. Excuses are extra.</p>
+</div>
+
+<div class="cards-container">
+    <div class="card" id="beachCard">
+        <div class="card-emoji">🏖️</div>
+        <h2>Beach Cruisers</h2>
+        <p>Laid-back frames, wide tires, and enough style to make the seagulls jealous. Perfect for boardwalks and gentle existential crises.</p>
+        <button class="card-btn beach-btn" onclick="window.location.href='beach-cruisers.html'">Browse Beach Cruisers</button>
+    </div>
+
+    <div class="card" id="mountainCard">
+        <div class="card-emoji">⛰️</div>
+        <h2>Mountain Bikes</h2>
+        <p>Suspension forks, aggressive geometry, and enough gears to confuse anyone who's never left the city. For people who think flat is boring.</p>
+        <button class="card-btn mountain-btn" onclick="window.location.href='mountain-bikes.html'">Browse Mountain Bikes</button>
+    </div>
+</div>
+
+<div class="footer">
+    <p>PedalPal &copy; 2008. All bikes should be real. All prices are made up. All deprecated code is intentional.</p>
+</div>
+
+<div class="reset-toast" id="resetToast"></div>
+
+<script>
+    // Reset button: click the bike emoji to reset all data to defaults.
+    // In .NET this was a hidden button that called ApplicationServices directly.
+    // In PHP this is a click handler that POSTs to bike-handler.php?action=reset.
+    // The architecture is simpler. The drama is the same.
+    // Previously required 3 clicks (because "two clicks might be accidental").
+    // That was clever. It was also why the reset button appeared not to work.
+    // One click. Direct. Unambiguous. Marginally less clever.
+    $('#easterEggBike').on('click', function() {
+        doReset();
+    });
+
+    function doReset() {
+        showToast('Resetting all data... 🔄');
+        $.ajax({
+            url: '/handlers/bike-handler.php?action=reset',
+            method: 'POST',
+            contentType: 'application/json',
+            success: function(response) {
+                showToast('✅ All data reset! Every bike is back. Every accessory is restocked. Time is a flat circle.');
+            },
+            error: function() {
+                showToast('❌ Reset failed. The bikes have escaped their defaults.');
+            }
+        });
+    }
+
+    function showToast(message) {
+        var $toast = $('#resetToast');
+        $toast.text(message).fadeIn(200);
+        clearTimeout(window._toastTimer);
+        window._toastTimer = setTimeout(function() {
+            $toast.fadeOut(400);
+        }, 3000);
+    }
+</script>
+
+</body>
+</html>

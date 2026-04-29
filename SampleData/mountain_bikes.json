@@ -1,0 +1,74 @@
+[
+    {
+        "BikeID": 101,
+        "ModelName": "TrailBlazer X9",
+        "Brand": "ApexRide",
+        "GearCount": 21,
+        "SuspensionType": "Full",
+        "FrameMaterial": "Aluminum",
+        "DailyRate": 24.99,
+        "IsAvailable": true,
+        "Terrain": "All-Mountain",
+        "WeightKg": 13.5
+    },
+    {
+        "BikeID": 102,
+        "ModelName": "Summit Shredder",
+        "Brand": "PeakForce",
+        "GearCount": 27,
+        "SuspensionType": "Full",
+        "FrameMaterial": "Carbon Fiber",
+        "DailyRate": 34.99,
+        "IsAvailable": true,
+        "Terrain": "Enduro",
+        "WeightKg": 11.2
+    },
+    {
+        "BikeID": 103,
+        "ModelName": "Canyon Crusher",
+        "Brand": "TerraRide",
+        "GearCount": 18,
+        "SuspensionType": "Hardtail",
+        "FrameMaterial": "Steel",
+        "DailyRate": 19.99,
+        "IsAvailable": false,
+        "Terrain": "Cross-Country",
+        "WeightKg": 14.8
+    },
+    {
+        "BikeID": 104,
+        "ModelName": "Ridge Runner",
+        "Brand": "ApexRide",
+        "GearCount": 24,
+        "SuspensionType": "Hardtail",
+        "FrameMaterial": "Aluminum",
+        "DailyRate": 22.99,
+        "IsAvailable": false,
+        "Terrain": "Trail",
+        "WeightKg": 12.9
+    },
+    {
+        "BikeID": 105,
+        "ModelName": "Peak Predator",
+        "Brand": "SummitX",
+        "GearCount": 30,
+        "SuspensionType": "Full",
+        "FrameMaterial": "Carbon Fiber",
+        "DailyRate": 39.99,
+        "IsAvailable": false,
+        "Terrain": "Downhill",
+        "WeightKg": 15.3
+    },
+    {
+        "BikeID": 106,
+        "ModelName": "Mud Maverick",
+        "Brand": "TerraRide",
+        "GearCount": 21,
+        "SuspensionType": "Full",
+        "FrameMaterial": "Aluminum",
+        "DailyRate": 27.99,
+        "IsAvailable": false,
+        "Terrain": "Enduro",
+        "WeightKg": 13.1
+    }
+]

@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beach Cruisers — PedalPal Bike Rentals</title>
+    <!-- jQuery 1.12.4: EOL since 2016. Still works. Still here. Like a flip phone in a drawer. -->
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"
+            integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
+            crossorigin="anonymous"></script>
+    <style>
+        :root { 
+            --primary:#f5576c; 
+            --glass:rgba(255,255,255,0.15); 
+        } 
+        /* smoother cards */ 
+        .bike-card { 
+            backdrop-filter: blur(10px); 
+            transition: all .25s ease; } .bike-card:hover { transform: translateY(-6px) scale(1.01); 
+        } 
+        /* better buttons */ 
+        .rent-btn { 
+            display:flex; 
+            justify-content:center; 
+            align-items:center; 
+            gap:6px; 
+        } 
+        /* modal animation */ 
+        .modal-overlay { 
+            opacity:0; 
+            transition:.3s; 
+        } 
+        .modal-overlay.active { 
+            opacity:1; 
+        } 
+        /* loading shimmer */ 
+        .loading-msg { 
+            animation: pulse 1.2s infinite; 
+        } 
+        @keyframes pulse { 
+            0% { opacity:.4 } 50% { opacity:1 } 100% { opacity:.4 } 
+        }
+
+        #pagination button {
+            margin: 5px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+        }
+
+        #pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        .page-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .page-header h1 { font-size: 2.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); margin-bottom: 8px; }
+        .page-header p { font-size: 1.1rem; opacity: 0.9; }
+
+        .back-link {
+            display: inline-block;
+            color: white;
+            text-decoration: none;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            opacity: 0.85;
+            transition: opacity 0.2s;
+        }
+        .back-link:hover { opacity: 1; text-decoration: underline; }
+
+        .bikes-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            justify-content: center;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .bike-card {
+            background: white;
+            border-radius: 14px;
+            padding: 28px;
+            width: 300px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+            transition: transform 0.2s;
+        }
+
+        .bike-card:hover { transform: translateY(-4px); }
+
+        .bike-card h3 {
+            font-size: 1.3rem;
+            color: #222;
+            margin-bottom: 14px;
+        }
+
+        .bike-detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .bike-detail .label { color: #888; }
+        .bike-detail .value { color: #333; font-weight: 500; }
+
+        .bike-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #e03050;
+            margin: 14px 0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .status-available { background: #e8f5e9; color: #2e7d32; }
+        .status-rented    { background: #fce4ec; color: #c62828; }
+
+        .rent-btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+        }
+
+        .rent-btn:hover:not(:disabled) { background: linear-gradient(135deg, #e070e8, #e03050); }
+        .rent-btn:active:not(:disabled) { transform: scale(0.97); }
+        .rent-btn:disabled {
+            background: #e0e0e0;
+            color: #aaa;
+            cursor: not-allowed;
+        }
+
+        .loading-msg {
+            text-align: center;
+            color: white;
+            font-size: 1.2rem;
+            padding: 60px;
+        }
+
+        .error-msg {
+            text-align: center;
+            background: rgba(255,255,255,0.9);
+            color: #c62828;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 500px;
+            margin: 40px auto;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 32px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+            position: relative;
+        }
+
+        .modal h2 { font-size: 1.6rem; color: #222; margin-bottom: 6px; }
+        .modal .modal-subtitle { color: #888; font-size: 0.95rem; margin-bottom: 24px; }
+
+        .modal-close {
+            position: absolute;
+            top: 16px; right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.6rem;
+            cursor: pointer;
+            color: #999;
+            line-height: 1;
+        }
+        .modal-close:hover { color: #333; }
+
+        .accessory-item {
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .accessory-info { flex: 1; }
+        .accessory-info h4 { font-size: 1rem; color: #222; margin-bottom: 4px; }
+        .accessory-info .acc-desc { font-size: 0.85rem; color: #888; margin-bottom: 4px; }
+        .accessory-info .acc-meta { font-size: 0.8rem; color: #aaa; }
+        .accessory-price { font-weight: 700; color: #e03050; font-size: 1.05rem; white-space: nowrap; }
+
+        .qty-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .qty-btn {
+            width: 32px; height: 32px;
+            border: 2px solid #e03050;
+            border-radius: 50%;
+            background: white;
+            color: #e03050;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .qty-btn:hover { background: #e03050; color: white; }
+
+        .qty-display {
+            min-width: 28px;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .bundle-banner {
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            border: 1px solid #e0b050;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: #5a3e00;
+            display: none;
+        }
+
+        .bundle-banner.active { display: block; }
+
+        .total-section {
+            border-top: 2px solid #f0f0f0;
+            padding-top: 18px;
+            margin-top: 6px;
+        }
+
+        .total-line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            color: #555;
+        }
+
+        .total-line.grand-total {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #222;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #eee;
+        }
+
+        .discount-line { color: #2e7d32; }
+
+        .confirm-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.2s;
+        }
+
+        .confirm-btn:hover { background: linear-gradient(135deg, #e070e8, #e03050); }
+        .confirm-btn:disabled { background: #e0e0e0; color: #aaa; cursor: not-allowed; }
+
+        .skip-btn {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: white;
+            color: #888;
+            font-size: 0.95rem;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: border-color 0.2s, color 0.2s;
+        }
+
+        .skip-btn:hover { border-color: #bbb; color: #555; }
+
+        .success-msg {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .success-msg .success-icon { font-size: 3rem; margin-bottom: 10px; }
+        .success-msg h3 { font-size: 1.4rem; color: #2e7d32; margin-bottom: 8px; }
+        .success-msg p { color: #555; font-size: 0.95rem; }
+    </style>
+</head>
+<body>
+
+<div class="page-header">
+    <a href="index.html" class="back-link">← Back to PedalPal</a>
+    <h1>🏖️ Beach Cruisers</h1>
+    <p>Slow down. Feel the breeze. Avoid thinking about your inbox.</p>
+</div>
+
+<div id="bikesContainer" class="bikes-grid">
+    <div class="loading-msg">Loading bikes...</div>
+</div>
+
+<div id="pagination" style="text-align:center;margin-top:20px;"></div>
+
+<!-- Accessory Modal -->
+<div class="modal-overlay" id="accessoryModal">
+    <div class="modal">
+        <button class="modal-close" id="modalClose">&times;</button>
+        <h2>Add Accessories</h2>
+        <p class="modal-subtitle" id="modalSubtitle">Loading accessories...</p>
+
+        <div class="bundle-banner" id="bundleBanner">
+            🎉 <strong>Bundle Deal!</strong> Water Bottle + Bike Light = 10% off your entire order.
+        </div>
+
+        <div id="accessoryList"></div>
+
+        <div class="total-section">
+            <div class="total-line" id="subtotalLine" style="display:none">
+                <span>Subtotal</span>
+                <span id="subtotalVal">$0.00</span>
+            </div>
+            <div class="total-line discount-line" id="discountLine" style="display:none">
+                <span>Bundle Discount (10%)</span>
+                <span id="discountVal">-$0.00</span>
+            </div>
+            <div class="total-line grand-total">
+                <span>Total</span>
+                <span id="totalVal">$0.00</span>
+            </div>
+        </div>
+
+        <button class="confirm-btn" id="confirmOrderBtn" disabled>Confirm Order</button>
+        <button class="skip-btn" id="skipAccessoriesBtn">No thanks, just the bike</button>
+
+        <div class="success-msg" id="orderSuccessMsg" style="display:none">
+            <div class="success-icon">🎉</div>
+            <h3>You're all set!</h3>
+            <p id="orderSuccessDetail"></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // In .NET this was an IHttpHandler. In PHP this is just a file.
+    // The file does not know it's an endpoint. It has no opinions about HTTP. It just runs.
+    var BIKE_HANDLER_URL    = '/handlers/bike-handler.php';
+    var ACCESSORY_HANDLER_URL = '/handlers/accessory-handler.php';
+    var BIKE_TYPE = 'beach';
+    var BUNDLE_IDS = [1, 3]; // Water Bottle + Bike Light = 10% off
+
+    var currentBikeId = null;
+    var accessories   = [];
+
+    var currentPage = 1;
+    var itemsPerPage = 3;
+    var allBikes = [];
+
+    // Load bikes on page load
+    $(document).ready(function() {
+        loadBikes();
+
+        // Event handlers registered ONCE here, outside openAccessoryModal.
+        // If you move these inside openAccessoryModal, they stack on every call.
+        // Each click of "Rent This Bike" would add another handler.
+        // By the third bike you'd click once and fire three times.
+        // jQuery 1.12.4 will happily let you do this. It does not judge. It just executes. Repeatedly.
+        // So: handlers go here. Once. At startup.
+
+        $('#modalClose').on('click', closeModal);
+        $('#skipAccessoriesBtn').on('click', function() {
+            closeModal();
+            refreshBikes();
+        });
+
+        $('#confirmOrderBtn').on('click', function() {
+            submitOrder();
+        });
+
+        // Qty +/- buttons: delegated events on the accessory list (dynamic content)
+        $('#accessoryList').on('click', '.qty-btn-minus', function() {
+            var id  = parseInt($(this).data('id'), 10);
+            adjustQty(id, -1);
+        });
+
+        $('#accessoryList').on('click', '.qty-btn-plus', function() {
+            var id  = parseInt($(this).data('id'), 10);
+            adjustQty(id, +1);
+        });
+
+        // Close modal on overlay click
+        $('#accessoryModal').on('click', function(e) {
+            if ($(e.target).is('#accessoryModal')) {
+                closeModal();
+                refreshBikes();
+            }
+        });
+    });
+
+    function loadBikes() {
+        // In .NET this was an async Task<IHttpActionResult>.
+        // In jQuery 1.12.4 this is $.ajax with a success callback.
+        // The success callback has no async/await. It has a function inside a function.
+        // It is callback city. Population: us.
+        $.ajax({
+            url: BIKE_HANDLER_URL + '?action=beach',
+            method: 'GET',
+            dataType: 'json',
+            success: function(bikes) {
+                allBikes = bikes;
+                renderBikes(bikes);
+            },
+            error: function(xhr, status, err) {
+                $('#bikesContainer').html('<div class="error-msg">Failed to load bikes. The PHP server may not be running. Try: npm start</div>');
+            }
+        });
+    }
+
+    function refreshBikes() {
+        loadBikes();
+    }
+
+    function renderBikes(bikes=[]) {
+        var $container = $('#bikesContainer');
+        $container.empty();
+
+        if (!allBikes || allBikes.length === 0) {
+            $container.html('<div class="loading-msg">No bikes found.</div>');
+            return;
+        }
+
+        var start = (currentPage - 1) * itemsPerPage;
+        var end   = start + itemsPerPage;
+        var pageItems = allBikes.slice(start, end);
+
+        $.each(pageItems, function(i, bike) {
+            var available  = bike.is_available;
+            var statusHtml = available
+                ? '<span class="status-badge status-available">Available</span>'
+                : '<span class="status-badge status-rented">Rented</span>';
+
+            var btnHtml = available
+                ? '<button class="rent-btn" data-id="' + bike.bike_id + '">Rent This Bike</button>'
+                : '<button class="rent-btn" disabled>Not Available</button>';
+
+            var card = '<div class="bike-card">' +
+                '<h3>' + bike.model_name + '</h3>' +
+                statusHtml +
+                '<div class="bike-detail"><span class="label">Color</span><span class="value">' + bike.color + '</span></div>' +
+                '<div class="bike-detail"><span class="label">Frame Size</span><span class="value">' + bike.frame_size + '</span></div>' +
+                '<div class="bike-price">$' + bike.daily_rate.toFixed(2) + '/day</div>' +
+                btnHtml +
+                '</div>';
+
+            $container.append(card);
+        });
+
+        // Bind rent buttons — rebind on each render (the buttons are fresh DOM)
+        $container.off('click', '.rent-btn').on('click', '.rent-btn', function() {
+            var bikeId = parseInt($(this).data('id'), 10);
+            rentBike(bikeId);
+        });
+
+        renderPaginationControls();
+    }
+
+    function rentBike(bikeId) {
+        $.ajax({
+            url: BIKE_HANDLER_URL + '?action=rent',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ bikeType: BIKE_TYPE, bikeId: bikeId }),
+            dataType: 'json',
+            success: function(response) {
+                if (response.Success) {
+                    currentBikeId = bikeId;
+                    openAccessoryModal(bikeId);
+                    refreshBikes(); // refresh in background so the card shows as rented
+                } else {
+                    alert('Could not rent bike: ' + response.Message);
+                    refreshBikes();
+                }
+            },
+            error: function() {
+                alert('Failed to rent bike. Check that the PHP server is running.');
+            }
+        });
+    }
+
+    function renderPaginationControls() {
+        var totalPages = Math.ceil(allBikes.length / itemsPerPage);
+        var $pagination = $('#pagination');
+        $pagination.empty();
+
+        if (totalPages <= 1) return;
+
+        // Prev button
+        var prevBtn = $('<button>Prev</button>');
+        prevBtn.prop('disabled', currentPage === 1);
+        prevBtn.click(function() {
+            currentPage--;
+            // renderPage();
+            renderBikes();
+        });
+
+        $pagination.append(prevBtn);
+
+        // Page numbers
+        for (var i = 1; i <= totalPages; i++) {
+            (function(page){
+                var btn = $('<button>' + page + '</button>');
+                if (page === currentPage) {
+                    btn.css({fontWeight:'bold'});
+                }
+                btn.click(function() {
+                    currentPage = page;
+                    // renderPage();
+                    renderBikes();
+                });
+                $pagination.append(btn);
+            })(i);
+        }
+
+        // Next button
+        var nextBtn = $('<button>Next</button>');
+        nextBtn.prop('disabled', currentPage === totalPages);
+        nextBtn.click(function() {
+            currentPage++;
+            // renderPage();
+            renderBikes();
+        });
+
+        $pagination.append(nextBtn);
+    }
+
+    function openAccessoryModal(bikeId) {
+        currentBikeId = bikeId;
+
+        // Reset modal state
+        $('#accessoryList').html('<p style="color:#888;text-align:center;padding:20px;">Loading accessories...</p>');
+        $('#modalSubtitle').text('Rented! Would you like to add anything?');
+        $('#bundleBanner').removeClass('active');
+        $('#subtotalLine').hide();
+        $('#discountLine').hide();
+        $('#totalVal').text('$0.00');
+        $('#confirmOrderBtn').prop('disabled', true);
+        $('#orderSuccessMsg').hide();
+        $('#confirmOrderBtn').show();
+        $('#skipAccessoriesBtn').show();
+
+        $('#accessoryModal').addClass('active');
+
+        // Fetch accessories compatible with beach bikes
+        $.ajax({
+            url: ACCESSORY_HANDLER_URL + '?bikeType=' + BIKE_TYPE,
+            method: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                accessories = data;
+                // Initialize quantities to 0
+                $.each(accessories, function(i, acc) {
+                    acc._qty = 0;
+                });
+                renderAccessories();
+            },
+            error: function() {
+                $('#accessoryList').html('<p style="color:#c62828;text-align:center;">Failed to load accessories.</p>');
+            }
+        });
+    }
+
+    function renderAccessories() {
+        var $list = $('#accessoryList');
+        $list.empty();
+
+        if (!accessories || accessories.length === 0) {
+            $list.html('<p style="color:#888;text-align:center;padding:20px;">No accessories available.</p>');
+            return;
+        }
+
+        $.each(accessories, function(i, acc) {
+            var qty = acc._qty || 0;
+            var stockNote = acc.StockCount > 0 ? 'In stock: ' + acc.StockCount : 'Out of stock';
+
+            var item = '<div class="accessory-item" id="acc-item-' + acc.AccessoryID + '">' +
+                '<div class="accessory-info">' +
+                    '<h4>' + acc.Name + '</h4>' +
+                    '<div class="acc-desc">' + acc.Description + '</div>' +
+                    '<div class="acc-meta">' + acc.Category + ' &bull; ' + stockNote + '</div>' +
+                '</div>' +
+                '<span class="accessory-price">$' + acc.UnitPrice.toFixed(2) + '</span>' +
+                '<div class="qty-control">' +
+                    '<button class="qty-btn qty-btn-minus" data-id="' + acc.AccessoryID + '">&#8722;</button>' +
+                    '<span class="qty-display" id="qty-' + acc.AccessoryID + '">' + qty + '</span>' +
+                    '<button class="qty-btn qty-btn-plus" data-id="' + acc.AccessoryID + '">+</button>' +
+                '</div>' +
+                '</div>';
+
+            $list.append(item);
+        });
+
+        updateTotals();
+    }
+
+    function adjustQty(accessoryId, delta) {
+        var acc = getAccessoryById(accessoryId);
+        if (!acc) return;
+
+        var newQty = (acc._qty || 0) + delta;
+        if (newQty < 0) newQty = 0;
+        if (newQty > acc.StockCount) newQty = acc.StockCount;
+
+        acc._qty = newQty;
+        $('#qty-' + accessoryId).text(newQty);
+        updateTotals();
+    }
+
+    function getAccessoryById(id) {
+        for (var i = 0; i < accessories.length; i++) {
+            if (accessories[i].AccessoryID === id) return accessories[i];
+        }
+        return null;
+    }
+
+    function updateTotals() {
+        var subtotal = 0;
+        var hasItems = false;
+        var bundleA  = false; // AccessoryID 1
+        var bundleB  = false; // AccessoryID 3
+
+        $.each(accessories, function(i, acc) {
+            var qty = acc._qty || 0;
+            if (qty > 0) {
+                subtotal += acc.UnitPrice * qty;
+                hasItems = true;
+                if (acc.AccessoryID === BUNDLE_IDS[0]) bundleA = true;
+                if (acc.AccessoryID === BUNDLE_IDS[1]) bundleB = true;
+            }
+        });
+
+        var bundleApplied  = bundleA && bundleB;
+        var discountAmount = bundleApplied ? Math.round(subtotal * 0.10 * 100) / 100 : 0;
+        var total          = Math.round((subtotal - discountAmount) * 100) / 100;
+
+        if (hasItems) {
+            $('#subtotalLine').show();
+            $('#subtotalVal').text('$' + subtotal.toFixed(2));
+        } else {
+            $('#subtotalLine').hide();
+        }
+
+        if (bundleApplied) {
+            $('#bundleBanner').addClass('active');
+            $('#discountLine').show();
+            $('#discountVal').text('-$' + discountAmount.toFixed(2));
+        } else {
+            $('#bundleBanner').removeClass('active');
+            $('#discountLine').hide();
+        }
+
+        $('#totalVal').text('$' + total.toFixed(2));
+        $('#confirmOrderBtn').prop('disabled', !hasItems);
+    }
+
+    function submitOrder() {
+        var orderItems = [];
+        $.each(accessories, function(i, acc) {
+            if (acc._qty > 0) {
+                orderItems.push({ AccessoryID: acc.AccessoryID, Quantity: acc._qty });
+            }
+        });
+
+        if (orderItems.length === 0) {
+            closeModal();
+            return;
+        }
+
+        $('#confirmOrderBtn').prop('disabled', true).text('Processing...');
+
+        $.ajax({
+            url: ACCESSORY_HANDLER_URL,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(orderItems),
+            dataType: 'json',
+            success: function(response) {
+                if (response.Success) {
+                    var detail = response.Message;
+                    if (response.BundleDiscountApplied) {
+                        detail += ' Total: $' + response.TotalPrice.toFixed(2) + ' (saved $' + response.DiscountAmount.toFixed(2) + ')';
+                    } else {
+                        detail += ' Total: $' + response.TotalPrice.toFixed(2);
+                    }
+                    $('#orderSuccessDetail').text(detail);
+                    $('#accessoryList').hide();
+                    $('#bundleBanner').hide();
+                    $('[class*="total-section"]').hide();
+                    $('.total-section').hide();
+                    $('#confirmOrderBtn').hide();
+                    $('#skipAccessoriesBtn').hide();
+                    $('#orderSuccessMsg').show();
+
+                    setTimeout(function() {
+                        closeModal();
+                    }, 3500);
+                } else {
+                    alert('Order failed: ' + response.Message);
+                    $('#confirmOrderBtn').prop('disabled', false).text('Confirm Order');
+                }
+            },
+            error: function() {
+                alert('Failed to submit order.');
+                $('#confirmOrderBtn').prop('disabled', false).text('Confirm Order');
+            }
+        });
+    }
+
+    function closeModal() {
+        $('#accessoryModal').removeClass('active');
+        // Reset for next time
+        $('#accessoryList').show();
+        $('#confirmOrderBtn').show().text('Confirm Order');
+        $('#skipAccessoriesBtn').show();
+        $('#orderSuccessMsg').hide();
+        currentBikeId = null;
+        accessories   = [];
+    }
+</script>
+
+</body>
+</html>
